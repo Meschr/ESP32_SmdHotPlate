@@ -8,8 +8,8 @@ class MAX6675
 public:
     MAX6675(int pinNumCs);
     double ReadTemperatureCelcius(void);
-    double ReadKelvin(void);
-    double ReadFahrenheit(void);
+    double ReadTemperatureKelvin(void);
+    double ReadTemperatureFahrenheit(void);
 
 private:
     spi_device_handle_t mSpiDeviceHdl;

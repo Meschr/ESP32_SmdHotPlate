@@ -4,6 +4,8 @@
 #include "esp_log.h"
 #include "driver/gpio.h"
 
+#include <cmath>
+
 static const char* TAG = "MAX6675";
 
 MAX6675::MAX6675(int pinNumCs)
@@ -31,7 +33,13 @@ double MAX6675::ReadTemperatureCelcius()
     cmd.flags = SPI_TRANS_USE_RXDATA;
     spi_device_transmit(mSpiDeviceHdl, &cmd);
 
-    uint16_t databuf = SPI_SWAP_DATA_RX(*(uint16_t*)cmd.rx_data,16);   
+    uint16_t databuf = SPI_SWAP_DATA_RX(*(uint16_t*)cmd.rx_data,16);
+    
+    if(databuf & 0x40)
+    {
+        ESP_LOGE(TAG,"No MAX6675 connected.");
+        return NAN;
+    }
     databuf >>=3;
     double temp = databuf*0.25;
 
@@ -39,14 +47,14 @@ double MAX6675::ReadTemperatureCelcius()
     return temp;
 }
 
-double MAX6675::ReadKelvin()
+double MAX6675::ReadTemperatureKelvin()
 {
     return CelsiusToKelvin(ReadTemperatureCelcius());
 }
 
-double MAX6675::ReadFahrenheit()
+double MAX6675::ReadTemperatureFahrenheit()
 {
-    return CelsiusToFahrenheit(ReadFahrenheit());
+    return CelsiusToFahrenheit(ReadTemperatureCelcius());
 }
 
 double MAX6675::CelsiusToKelvin(const double celsius) 
